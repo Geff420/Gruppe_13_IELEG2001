@@ -16,6 +16,7 @@ def connectServer(host, port):
 	clientSocket = socket(AF_INET, SOCK_STREAM)
 	try:
 		clientSocket.connect((host, port))
+		print("Connected with: ", host, port)
 		return True
 	except IOError as e:
 		print("ERROR: ", e)
@@ -39,7 +40,8 @@ def requestServer(req):
 	#:return: True if sent successfully, False otherwise
 	global clientSocket
 	try:
-		clientSocket.send(message.encode(req))
+		req = req + "\n"
+		clientSocket.send(req.encode())
 		return True
 	except IOError as e:
 		print("ERROR: ", e)
@@ -51,8 +53,9 @@ def readResponse():
 	#:return: = response from the server
 	global clientSocket
 	try:
-		resp = clientSocket.recv(1024)
-		return resp
+		resp = clientSocket.recv(1000)
+		response = resp.decode()
+		return response
 	except IOError as e:
 		return None
 	return None
@@ -78,8 +81,8 @@ def clientTests():
 	
 	print("Server responded with: ", response)
 	secsToSlp = 2 + random.randint(0, 5)
-    print("Sleeping %i seconds to allow simulate long client-server connection..." % secsToSlp)
-    time.sleep(secsToSlp)
+	print("Sleeping %i seconds to allow simulate long client-server connection..." % secsToSlp)
+	time.sleep(secsToSlp)
 	
 	request = "bla+bla"
 	if not requestServer(request):
@@ -91,7 +94,7 @@ def clientTests():
 		return "ERROR: Failed to receive server's response!"
 	
 	print("Server responded with: ", response)
-	if not (requestServer("game over") and closeConnection():
+	if not (requestServer("game over") and closeConnection()):
 		return "ERROR: Could not finish the conversation with the server"
 	
 	print("Game over, connection closed")
